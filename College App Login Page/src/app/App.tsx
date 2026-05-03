@@ -20,7 +20,6 @@ import { StudentTimetablePage } from "@/components/student/StudentTimetablePage"
 import { UnifiedTimetable } from "@/components/common/UnifiedTimetable"
 import { FacultyListPage } from "@/components/faculty/FacultyListPage"
 import { motion, AnimatePresence } from 'motion/react'
-import { Wifi, Battery, Signal } from 'lucide-react'
 
 type Screen = 'role-selection' | 'admin-creds' | 'admin-login' | 'admin-dashboard' | 'admin-faculty-list' | 'principal-creds' | 'hod-creds' | 'faculty-creds' | 'login' | 'hod-login' | 'faculty-login' | 'faculty-registration' | 'student-login' | 'student-dashboard' | 'student-details' | 'student-syllabus' | 'student-academic-timetable' | 'student-exam-timetable' | 'hod-main-dashboard' | 'faculty-dashboard' | 'principal-dashboard' | 'principal-student-affairs' | 'principal-faculty-management' | 'departments' | 'department-detail' | 'timetable'
 
@@ -275,19 +274,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      {/* Mobile Status Bar */}
-      <div className="flex items-center justify-between px-6 py-2 bg-white/80 backdrop-blur-sm">
-        <div className="flex items-center gap-1">
-          <span className="text-sm font-medium">9:41 AM</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Signal className="w-4 h-4" />
-          <Wifi className="w-4 h-4" />
-          <Battery className="w-4 h-4" />
-          <span className="text-sm">100%</span>
-        </div>
-      </div>
-
       {/* Main Content with Transitions */}
       <AnimatePresence mode="wait">
         <motion.div
