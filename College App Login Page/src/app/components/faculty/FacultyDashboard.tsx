@@ -127,7 +127,7 @@ export function FacultyDashboard({ onBack }: FacultyDashboardProps) {
     return (
       <div className="space-y-6">
         {/* Welcome Section with Date */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-gray-900 text-2xl font-semibold">Welcome back, {facultyData.name}!</h2>
             <p className="text-sm text-gray-600 mt-1">Today is a great day for teaching and learning.</p>
@@ -152,7 +152,7 @@ export function FacultyDashboard({ onBack }: FacultyDashboardProps) {
         </Card>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -322,7 +322,7 @@ export function FacultyDashboard({ onBack }: FacultyDashboardProps) {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 px-4 border-t">
+        <div className="flex items-center gap-1 px-4 border-t overflow-x-auto hide-scrollbar">
           <Button
             variant={activeTab === 'home' ? 'default' : 'ghost'}
             size="sm"

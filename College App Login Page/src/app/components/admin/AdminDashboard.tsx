@@ -141,7 +141,7 @@ export function AdminDashboard({ onBack, onNavigate }: AdminDashboardProps) {
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="flex items-center justify-between p-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between p-4 gap-4">
           <div>
             <h1 className="text-gray-900">Admin Dashboard</h1>
             <p className="text-sm text-gray-600">System Administration Panel</p>
@@ -308,7 +308,7 @@ export function AdminDashboard({ onBack, onNavigate }: AdminDashboardProps) {
             </div>
             <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
               {/* Statistics */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4 text-center">
                     <div className="text-2xl font-bold text-blue-600">{totalStudents}</div>
@@ -433,7 +433,7 @@ export function AdminDashboard({ onBack, onNavigate }: AdminDashboardProps) {
             </div>
             <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
               {/* Session Info */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Card>
                   <CardContent className="p-4 text-center">
                     <div className="text-2xl font-bold text-teal-600">{academicSettings.currentSession}</div>

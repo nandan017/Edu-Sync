@@ -193,7 +193,7 @@ export function HODMainDashboard({ onBack }: HODMainDashboardProps) {
     return (
       <div className="space-y-6">
         {/* Welcome Section */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back, Dr. Kumar!</h2>
             <p className="text-gray-600">Leading the BCA department with excellence and innovation.</p>
@@ -219,7 +219,7 @@ export function HODMainDashboard({ onBack }: HODMainDashboardProps) {
       </Card>
 
       {/* Stats and Schedule Grid */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Department Stats */}
         <Card>
           <CardContent className="p-6">
@@ -422,20 +422,6 @@ export function HODMainDashboard({ onBack }: HODMainDashboardProps) {
         </CardContent>
       </Card>
 
-      {/* Leave Request Button Section */}
-      <div className="mt-6">
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <Button
-              onClick={handleLeaveRequest}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700"
-            >
-              Request Leave
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 
@@ -489,7 +475,7 @@ export function HODMainDashboard({ onBack }: HODMainDashboardProps) {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 px-4 border-t">
+        <div className="flex items-center gap-1 px-4 border-t overflow-x-auto hide-scrollbar">
           <Button
             variant={activeTab === 'home' ? 'default' : 'ghost'}
             size="sm"

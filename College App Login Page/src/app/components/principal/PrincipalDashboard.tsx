@@ -109,7 +109,7 @@ export function PrincipalDashboard({ onBack, onNavigate }: PrincipalDashboardPro
             {/* Welcome Board */}
             <Card>
               <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div>
                     <h2 className="text-gray-900 mb-2">Welcome back, Dr. Mehta!</h2>
                     <p className="text-gray-600">Leading with vision, inspiring excellence in education.</p>
@@ -164,7 +164,7 @@ export function PrincipalDashboard({ onBack, onNavigate }: PrincipalDashboardPro
 
             {/* Main Dashboard Options */}
             <div>
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                 <h2 className="text-gray-900">Management Dashboard</h2>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm">
@@ -334,7 +334,7 @@ export function PrincipalDashboard({ onBack, onNavigate }: PrincipalDashboardPro
           </div>
 
           {/* Menu Bar */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto hide-scrollbar max-w-[50vw] sm:max-w-none">
             <Button
               variant={activeTab === 'home' ? 'default' : 'ghost'}
               size="sm"

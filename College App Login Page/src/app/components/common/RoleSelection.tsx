@@ -87,7 +87,7 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-pink-100 flex flex-col items-center justify-center p-6 relative">
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
-        <div className="text-center space-y-2 mb-12">
+        <div className="text-center space-y-2 mb-8 md:mb-12">
           <h1 className="text-gray-800">Select Your Role</h1>
           <p className="text-gray-600">
             Please choose your login role to proceed
@@ -138,8 +138,8 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
 
       {/* Help AI Assistant Modal */}
       {showHelpAssistant && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-2xl h-[600px] flex flex-col shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-xl w-full max-w-2xl h-[90vh] sm:h-[600px] flex flex-col shadow-2xl">
             {/* Help Assistant Header */}
             <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
               <div className="flex items-center gap-3">

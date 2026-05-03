@@ -32,51 +32,7 @@ export function StudentDashboard({ onBack, onNavigate }: StudentDashboardProps) 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex">
-      {/* Left Sidebar - Student Profile */}
-      <div className="w-80 bg-white shadow-lg border-r flex flex-col">
-        <div className="p-6 border-b bg-gradient-to-br from-blue-50 to-indigo-50">
-          <div className="text-center">
-            <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-white shadow-lg">
-              <ImageWithFallback
-                src={studentData.photo}
-                alt="Student Photo"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <h2 className="text-gray-900 mb-1">{studentData.name}</h2>
-            <p className="text-gray-600 text-sm mb-1">{studentData.course}</p>
-            <p className="text-gray-500 text-xs">{studentData.semester}</p>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-4 flex-1">
-          <div className="space-y-3">
-            <div className="p-3 bg-gray-50 rounded-lg flex items-start gap-2">
-              <Hash className="w-4 h-4 text-gray-500 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-xs text-gray-500">Roll Number</p>
-                <p className="text-sm text-gray-900">{studentData.rollNumber}</p>
-              </div>
-            </div>
-            <div className="p-3 bg-gray-50 rounded-lg flex items-start gap-2">
-              <Mail className="w-4 h-4 text-gray-500 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-xs text-gray-500">Email</p>
-                <p className="text-xs text-gray-900">{studentData.email}</p>
-              </div>
-            </div>
-            <div className="p-3 bg-gray-50 rounded-lg flex items-start gap-2">
-              <Phone className="w-4 h-4 text-gray-500 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-xs text-gray-500">Phone</p>
-                <p className="text-sm text-gray-900">{studentData.phone}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col">
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Top Navigation Bar */}
@@ -111,7 +67,7 @@ export function StudentDashboard({ onBack, onNavigate }: StudentDashboardProps) 
           </div>
 
           {/* Tab Menu */}
-          <div className="flex items-center gap-1 px-4 border-t">
+          <div className="flex items-center gap-1 px-4 border-t overflow-x-auto hide-scrollbar">
             <Button
               variant={activeTab === 'home' ? 'default' : 'ghost'}
               size="sm"
@@ -139,25 +95,6 @@ export function StudentDashboard({ onBack, onNavigate }: StudentDashboardProps) 
         {/* Main Content */}
         <div className="flex-1 p-6 overflow-y-auto">
           <div className="max-w-4xl mx-auto space-y-6">
-            {/* Welcome Section */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-gray-900 mb-2">Welcome to Student Portal</h2>
-                <p className="text-gray-600 mb-4">
-                  Access your academic information and resources
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">8.45</div>
-                    <div className="text-xs text-gray-600">CGPA</div>
-                  </div>
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">92%</div>
-                    <div className="text-xs text-gray-600">Attendance</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Timetable Cards */}
             <div>

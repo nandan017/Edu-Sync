@@ -317,12 +317,12 @@ export function UnifiedTimetable({ onBack, userRole, department = '', title }: U
             <h1 className="text-gray-900">{getRoleTitle()}</h1>
             <p className="text-sm text-gray-600">Academic Year 2024-25</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="w-full sm:w-auto">
               <Printer className="w-4 h-4 mr-2" />
               Print
             </Button>
@@ -355,7 +355,7 @@ export function UnifiedTimetable({ onBack, userRole, department = '', title }: U
         </Card>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-4 overflow-x-auto hide-scrollbar pb-2">
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium text-gray-700">Department:</label>
             <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>

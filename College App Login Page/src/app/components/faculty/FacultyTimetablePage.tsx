@@ -67,17 +67,17 @@ export function FacultyTimetablePage({ onBack, department = "BCA" }: FacultyTime
     <div className="min-h-screen bg-white">
       <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
               <Calendar className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Department Timetable Management</h2>
-              <p className="text-sm text-gray-600">Working Hours: 7:30 AM - 2:30 PM | Maximum 4 hours per faculty per day</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">Department Timetable Management</h2>
+              <p className="text-xs sm:text-sm text-gray-600">Working Hours: 7:30 AM - 2:30 PM | Max 4 hours per faculty</p>
             </div>
           </div>
-          <Button className="bg-black text-white hover:bg-gray-800 flex items-center gap-2">
+          <Button className="bg-black text-white hover:bg-gray-800 flex items-center gap-2 w-full sm:w-auto justify-center">
             <Edit className="w-4 h-4" />
             Edit Timetable
           </Button>
@@ -90,7 +90,7 @@ export function FacultyTimetablePage({ onBack, department = "BCA" }: FacultyTime
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b">
-                    <th className="p-4 text-left font-semibold text-gray-700 bg-gray-50 border-r">Time</th>
+                    <th className="p-4 text-left font-semibold text-gray-700 bg-gray-50 border-r sticky left-0 z-10">Time</th>
                     {days.map(day => (
                       <th key={day} className="p-4 text-left font-semibold text-gray-700 bg-gray-50 border-r last:border-r-0 min-w-[150px]">
                         {day}
@@ -101,7 +101,7 @@ export function FacultyTimetablePage({ onBack, department = "BCA" }: FacultyTime
                 <tbody>
                   {timeSlots.map((slot) => (
                     <tr key={slot.time} className="border-b last:border-b-0">
-                      <td className="p-4 font-medium text-gray-900 bg-gray-50 border-r whitespace-nowrap">
+                      <td className="p-4 font-medium text-gray-900 bg-gray-50 border-r whitespace-nowrap sticky left-0 z-10">
                         {slot.label}
                       </td>
                       {days.map(day => {
@@ -136,17 +136,6 @@ export function FacultyTimetablePage({ onBack, department = "BCA" }: FacultyTime
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="font-semibold text-gray-900 mb-3">Quick Actions</h3>
-            <div className="flex gap-3">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                Request Leave
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )

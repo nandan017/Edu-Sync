@@ -118,7 +118,7 @@ export function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-center p-6 min-h-[calc(100vh-80px)]">
+      <div className="flex items-center justify-center p-4 sm:p-6 min-h-[calc(100vh-80px)]">
         <div className="w-full max-w-md">
           {/* College Branding */}
           <div className="text-center mb-8">

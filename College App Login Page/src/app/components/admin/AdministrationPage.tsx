@@ -288,7 +288,7 @@ export function AdministrationPage({ onBack }: AdministrationPageProps) {
         </div>
 
         {/* Section Navigation */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg overflow-x-auto">
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg overflow-x-auto hide-scrollbar">
           <Button
             variant={activeSection === 'overview' ? 'default' : 'ghost'}
             size="sm"
@@ -346,7 +346,7 @@ export function AdministrationPage({ onBack }: AdministrationPageProps) {
                 
                 <CardContent className="space-y-4">
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                     {Object.entries(section.stats).map(([key, value], index) => (
                       <div key={key} className="text-center p-2 bg-gray-50 rounded-lg">
                         <div className="font-semibold text-sm text-gray-900">{value}</div>
