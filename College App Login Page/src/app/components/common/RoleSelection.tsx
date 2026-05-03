@@ -84,7 +84,7 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-pink-100 flex flex-col items-center justify-center p-6 relative">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 to-pink-100 flex flex-col items-center justify-center p-6 py-12 sm:py-20 relative overflow-y-auto">
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center space-y-2 mb-8 md:mb-12">
@@ -100,15 +100,15 @@ export function RoleSelection({ onRoleSelect }: RoleSelectionProps) {
             <Button
               key={role.id}
               onClick={() => onRoleSelect(role.id)}
-              className={`w-full min-h-[80px] h-auto p-0 overflow-hidden bg-gradient-to-r ${role.gradient} hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl`}
+              className={`w-full min-h-[80px] h-auto p-0 overflow-hidden bg-gradient-to-r ${role.gradient} hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl whitespace-normal`}
               variant="ghost"
             >
-              <div className="flex items-center justify-between w-full h-full px-4 sm:px-6 py-4">
-                <div className="text-left">
-                  <div className="text-gray-800 font-bold text-lg mb-1">
+              <div className="flex items-center justify-between w-full h-full px-4 sm:px-6 py-4 gap-4">
+                <div className="text-left min-w-0">
+                  <div className="text-gray-800 font-bold text-lg mb-0.5 leading-tight">
                     {role.title}
                   </div>
-                  <div className="text-gray-700 text-sm">
+                  <div className="text-gray-700 text-xs sm:text-sm leading-tight">
                     {role.subtitle}
                   </div>
                 </div>
