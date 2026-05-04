@@ -1,0 +1,16 @@
+const router = require('express').Router();
+const principal = require('../controllers/principal.controller');
+const { authenticate, authorize } = require('../middleware/auth');
+
+router.use(authenticate, authorize('principal'));
+
+router.get('/dashboard', principal.getDashboard);
+router.get('/departments', principal.getDepartments);
+router.get('/departments/:id', principal.getDepartmentById);
+router.get('/faculty', principal.getFaculty);
+router.get('/students', principal.getStudents);
+router.get('/leave-requests', principal.getLeaveRequests);
+router.put('/leave-requests/:id', principal.reviewLeaveRequest);
+router.get('/profile', principal.getProfile);
+
+module.exports = router;

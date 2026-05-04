@@ -1,0 +1,2354 @@
+{
+  "info": {
+    "name": "Edu-Sync API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "departmentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "courseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "staffId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "timetableId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "leaveRequestId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin@123\",\n  \"recaptchaToken\": \"test-token\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response has token\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property(\"token\").that.is.a(\"string\");",
+                  "  pm.collectionVariables.set(\"authToken\", json.token);",
+                  "});",
+                  "pm.test(\"Response has refreshToken\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property(\"refreshToken\").that.is.a(\"string\");",
+                  "  pm.collectionVariables.set(\"refreshToken\", json.refreshToken);",
+                  "});",
+                  "pm.test(\"Response time < 2000ms\", () => pm.expect(pm.response.responseTime).to.be.below(2000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"Test@1234\",\n  \"dateOfBirth\": \"2003-06-15\",\n  \"gender\": \"male\",\n  \"departmentId\": \"{{departmentId}}\",\n  \"courseId\": \"{{courseId}}\",\n  \"yearOfJoining\": 2024,\n  \"section\": \"A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Response has token\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property(\"token\").that.is.a(\"string\");",
+                  "});",
+                  "pm.test(\"Register number is auto-generated\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.student).to.have.property(\"registerNumber\").that.matches(/^[A-Z]+-\\d{4}-\\d+$/);",
+                  "});",
+                  "pm.test(\"Duplicate email+phone returns 409\", () => {",
+                  "  if (pm.response.code === 409) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Logout message present\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property(\"message\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"New access token returned\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property(\"token\").that.is.a(\"string\");",
+                  "  pm.collectionVariables.set(\"authToken\", json.token);",
+                  "});",
+                  "pm.test(\"Invalid refresh token returns 401\", () => {",
+                  "  if (pm.response.code === 401) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Dashboard has stats\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an(\"object\");",
+                  "});",
+                  "pm.test(\"Unauthenticated request returns 401\", () => {",
+                  "  if (pm.response.code === 401) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "profile"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Profile has username and role\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property(\"username\");",
+                  "  pm.expect(json).to.have.property(\"role\").that.equals(\"admin\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Staff Management",
+          "item": [
+            {
+              "name": "List Staff",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/staff",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "staff"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"Response is an array or paginated object\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.be.an(\"object\");",
+                      "});",
+                      "pm.test(\"Staff records include decrypted credentials\", () => {",
+                      "  const json = pm.response.json();",
+                      "  if (json.data && json.data.length > 0) {",
+                      "    pm.expect(json.data[0]).to.have.property(\"username\");",
+                      "  }",
+                      "});",
+                      "pm.test(\"Non-admin role returns 403\", () => {",
+                      "  if (pm.response.code === 403) {",
+                      "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create Staff",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/staff",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "staff"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"Dr. Priya Sharma\",\n  \"email\": \"priya.sharma@college.edu\",\n  \"phone\": \"9876543211\",\n  \"departmentId\": \"{{departmentId}}\",\n  \"designation\": \"Assistant Professor\",\n  \"qualification\": \"M.Tech\",\n  \"isHOD\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                      "pm.test(\"Created staff has employeeId\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.staff || json).to.have.property(\"employeeId\");",
+                      "});",
+                      "pm.test(\"Auto-generated username present\", () => {",
+                      "  const json = pm.response.json();",
+                      "  const staff = json.staff || json;",
+                      "  pm.expect(staff).to.have.property(\"username\").that.is.a(\"string\");",
+                      "});",
+                      "pm.test(\"Duplicate email returns 409\", () => {",
+                      "  if (pm.response.code === 409) {",
+                      "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Bulk Import Staff",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/staff/bulk-import",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "staff",
+                    "bulk-import"
+                  ]
+                },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": ""
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200 or 201\", () => {",
+                      "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                      "});",
+                      "pm.test(\"Response has import summary\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.have.property(\"imported\").that.is.a(\"number\");",
+                      "  pm.expect(json).to.have.property(\"skipped\").that.is.a(\"number\");",
+                      "});",
+                      "pm.test(\"Errors array present for failed rows\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.have.property(\"errors\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Max 500 rows enforced\", () => {",
+                      "  if (pm.response.code === 400) {",
+                      "    pm.expect(pm.response.json().message).to.include(\"500\");",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update Staff",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/staff/{{staffId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "staff",
+                    "{{staffId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"designation\": \"Associate Professor\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"Updated fields reflected in response\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.be.an(\"object\");",
+                      "});",
+                      "pm.test(\"Invalid ID returns 404\", () => {",
+                      "  if (pm.response.code === 404) {",
+                      "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Delete Staff",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/staff/{{staffId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "staff",
+                    "{{staffId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"Deletion confirmation message present\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.have.property(\"message\");",
+                      "});",
+                      "pm.test(\"Invalid ID returns 404\", () => {",
+                      "  if (pm.response.code === 404) {",
+                      "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Student Management",
+          "item": [
+            {
+              "name": "List Students",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/students",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "students"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"Response is paginated\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.be.an(\"object\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create Student",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/students",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "students"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"phone\": \"9876543212\",\n  \"password\": \"Test@1234\",\n  \"dateOfBirth\": \"2004-01-20\",\n  \"gender\": \"female\",\n  \"departmentId\": \"{{departmentId}}\",\n  \"courseId\": \"{{courseId}}\",\n  \"yearOfJoining\": 2024,\n  \"section\": \"B\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                      "pm.test(\"Register number auto-generated\", () => {",
+                      "  const json = pm.response.json();",
+                      "  const student = json.student || json;",
+                      "  pm.expect(student).to.have.property(\"registerNumber\");",
+                      "});",
+                      "pm.test(\"Duplicate email+phone returns 409\", () => {",
+                      "  if (pm.response.code === 409) {",
+                      "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update Student",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/students/{{studentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "students",
+                    "{{studentId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"semester\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"Updated fields reflected\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.be.an(\"object\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Delete Student",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/students/{{studentId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "students",
+                    "{{studentId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"Deletion message present\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.have.property(\"message\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Timetable Management",
+          "item": [
+            {
+              "name": "Upload Workload CSV",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/timetable/upload-workload",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "timetable",
+                    "upload-workload"
+                  ]
+                },
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": ""
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200 or 201\", () => {",
+                      "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                      "});",
+                      "pm.test(\"Timetable IDs returned\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.have.property(\"generatedTimetableIds\").that.is.an(\"array\");",
+                      "});",
+                      "pm.test(\"Workload status is processed\", () => {",
+                      "  const json = pm.response.json();",
+                      "  if (json.workload) {",
+                      "    pm.expect(json.workload.status).to.equal(\"processed\");",
+                      "  }",
+                      "});",
+                      "pm.test(\"Invalid CSV format returns 400\", () => {",
+                      "  if (pm.response.code === 400) {",
+                      "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "List Workloads",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/timetable/workloads",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "timetable",
+                    "workloads"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"Response is an array\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json.data || json).to.be.an(\"array\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Timetables",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/timetable",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "timetable"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"Timetables have slots array\", () => {",
+                      "  const json = pm.response.json();",
+                      "  const timetables = json.data || json;",
+                      "  if (Array.isArray(timetables) && timetables.length > 0) {",
+                      "    pm.expect(timetables[0]).to.have.property(\"slots\").that.is.an(\"array\");",
+                      "  }",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update Timetable",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/timetable/{{timetableId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "timetable",
+                    "{{timetableId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"slots\": []\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"Updated timetable returned\", () => {",
+                      "  const json = pm.response.json();",
+                      "  pm.expect(json).to.be.an(\"object\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Publish Timetable",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/timetable/{{timetableId}}/publish",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "timetable",
+                    "{{timetableId}}",
+                    "publish"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                      "pm.test(\"isPublished is true\", () => {",
+                      "  const json = pm.response.json();",
+                      "  const timetable = json.timetable || json;",
+                      "  pm.expect(timetable.isPublished).to.equal(true);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Principal",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/principal/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "principal",
+                "dashboard"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Dashboard data present\", () => {",
+                  "  pm.expect(pm.response.json()).to.be.an(\"object\");",
+                  "});",
+                  "pm.test(\"Non-principal role returns 403\", () => {",
+                  "  if (pm.response.code === 403) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/principal/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "principal",
+                "profile"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Profile has role principal\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.role || (json.user && json.user.role)).to.equal(\"principal\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Departments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/principal/departments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "principal",
+                "departments"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Departments array returned\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data || json).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Department",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/principal/departments/{{departmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "principal",
+                "departments",
+                "{{departmentId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Department has name and hodId\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const dept = json.department || json;",
+                  "  pm.expect(dept).to.have.property(\"name\");",
+                  "});",
+                  "pm.test(\"Invalid ID returns 404\", () => {",
+                  "  if (pm.response.code === 404) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Faculty",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/principal/faculty",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "principal",
+                "faculty"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Faculty list returned\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data || json).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Students",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/principal/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "principal",
+                "students"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Students list returned\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data || json).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get HOD Leave Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/principal/leave-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "principal",
+                "leave-requests"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Leave requests are for HOD role\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const requests = json.data || json;",
+                  "  if (Array.isArray(requests) && requests.length > 0) {",
+                  "    pm.expect(requests[0].requesterRole).to.equal(\"hod\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Review HOD Leave Request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/principal/leave-requests/{{leaveRequestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "principal",
+                "leave-requests",
+                "{{leaveRequestId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"remarks\": \"Approved\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Leave status updated\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const leave = json.leaveRequest || json;",
+                  "  pm.expect(leave.status).to.be.oneOf([\"approved\", \"rejected\"]);",
+                  "});",
+                  "pm.test(\"Timetable slots updated on approval\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const leave = json.leaveRequest || json;",
+                  "  if (leave.status === \"approved\") {",
+                  "    pm.expect(leave).to.have.property(\"timetableSlotsAffected\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "HOD",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hod/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hod",
+                "dashboard"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Dashboard has dept stats\", () => {",
+                  "  pm.expect(pm.response.json()).to.be.an(\"object\");",
+                  "});",
+                  "pm.test(\"Non-HOD role returns 403\", () => {",
+                  "  if (pm.response.code === 403) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Dept Faculty",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hod/faculty",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hod",
+                "faculty"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Faculty belong to HOD's department\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data || json).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Dept Timetable",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hod/timetable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hod",
+                "timetable"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Timetable has slots with leave overlays\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const timetable = json.timetable || json;",
+                  "  if (timetable.slots) {",
+                  "    pm.expect(timetable.slots).to.be.an(\"array\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Timetable",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hod/timetable/{{timetableId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hod",
+                "timetable",
+                "{{timetableId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slots\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Updated timetable returned\", () => {",
+                  "  pm.expect(pm.response.json()).to.be.an(\"object\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload Syllabus",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hod/syllabus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hod",
+                "syllabus"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200 or 201\", () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "pm.test(\"Syllabus record created\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.syllabus || json).to.be.an(\"object\");",
+                  "});",
+                  "pm.test(\"Non-PDF file returns 400\", () => {",
+                  "  if (pm.response.code === 400) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Syllabi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hod/syllabus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hod",
+                "syllabus"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Syllabi array returned\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data || json).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Faculty Leave Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hod/leave-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hod",
+                "leave-requests"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Leave requests are for faculty role\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const requests = json.data || json;",
+                  "  if (Array.isArray(requests) && requests.length > 0) {",
+                  "    pm.expect(requests[0].requesterRole).to.equal(\"faculty\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Review Faculty Leave Request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hod/leave-requests/{{leaveRequestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hod",
+                "leave-requests",
+                "{{leaveRequestId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"remarks\": \"Approved\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Leave status updated\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const leave = json.leaveRequest || json;",
+                  "  pm.expect(leave.status).to.be.oneOf([\"approved\", \"rejected\"]);",
+                  "});",
+                  "pm.test(\"Timetable slots marked isOnLeave on approval\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const leave = json.leaveRequest || json;",
+                  "  if (leave.status === \"approved\") {",
+                  "    pm.expect(leave).to.have.property(\"timetableSlotsAffected\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Submit HOD Leave Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/hod/leave-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "hod",
+                "leave-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveType\": \"Casual\",\n  \"startDate\": \"2025-06-01\",\n  \"endDate\": \"2025-06-03\",\n  \"reason\": \"Personal work\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Leave request created with pending status\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const leave = json.leaveRequest || json;",
+                  "  pm.expect(leave.status).to.equal(\"pending\");",
+                  "  pm.expect(leave.approverRole).to.equal(\"principal\");",
+                  "});",
+                  "pm.test(\"Missing required fields returns 400\", () => {",
+                  "  if (pm.response.code === 400) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Faculty",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/faculty/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "faculty",
+                "dashboard"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Dashboard data present\", () => {",
+                  "  pm.expect(pm.response.json()).to.be.an(\"object\");",
+                  "});",
+                  "pm.test(\"Non-faculty role returns 403\", () => {",
+                  "  if (pm.response.code === 403) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Timetable",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/faculty/timetable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "faculty",
+                "timetable"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Timetable has slots\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const timetable = json.timetable || json;",
+                  "  if (timetable.slots) {",
+                  "    pm.expect(timetable.slots).to.be.an(\"array\");",
+                  "  }",
+                  "});",
+                  "pm.test(\"Leave slots marked isOnLeave\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const timetable = json.timetable || json;",
+                  "  if (timetable.slots) {",
+                  "    timetable.slots.forEach(slot => {",
+                  "      pm.expect(slot).to.have.property(\"isOnLeave\");",
+                  "    });",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Submit Leave Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/faculty/leave-request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "faculty",
+                "leave-request"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveType\": \"Medical\",\n  \"startDate\": \"2025-06-10\",\n  \"endDate\": \"2025-06-11\",\n  \"reason\": \"Doctor appointment\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Leave request has pending status\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const leave = json.leaveRequest || json;",
+                  "  pm.expect(leave.status).to.equal(\"pending\");",
+                  "  pm.expect(leave.approverRole).to.equal(\"hod\");",
+                  "});",
+                  "pm.test(\"Overlapping leave dates return 409\", () => {",
+                  "  if (pm.response.code === 409) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get My Leave Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/faculty/leave-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "faculty",
+                "leave-requests"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Leave requests belong to current faculty\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data || json).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Syllabus",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/faculty/syllabus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "faculty",
+                "syllabus"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Syllabi array returned\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data || json).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Student",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/student/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "profile"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Profile has CGPA and attendance\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const student = json.student || json;",
+                  "  pm.expect(student).to.have.property(\"cgpa\");",
+                  "  pm.expect(student).to.have.property(\"attendance\");",
+                  "});",
+                  "pm.test(\"Non-student role returns 403\", () => {",
+                  "  if (pm.response.code === 403) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/student/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "profile"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"123 Main St, Chennai\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Updated fields reflected\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.be.an(\"object\");",
+                  "});",
+                  "pm.test(\"Cannot update restricted fields (registerNumber)\", () => {",
+                  "  if (pm.response.code === 400) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Academic Timetable",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/student/timetable/academic",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "timetable",
+                "academic"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Timetable has slots\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const timetable = json.timetable || json;",
+                  "  if (timetable.slots) {",
+                  "    pm.expect(timetable.slots).to.be.an(\"array\");",
+                  "  }",
+                  "});",
+                  "pm.test(\"Leave slots show isOnLeave flag\", () => {",
+                  "  const json = pm.response.json();",
+                  "  const timetable = json.timetable || json;",
+                  "  if (timetable.slots) {",
+                  "    timetable.slots.forEach(slot => {",
+                  "      pm.expect(slot).to.have.property(\"isOnLeave\");",
+                  "    });",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Exam Timetable",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/student/timetable/exam",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "timetable",
+                "exam"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200 or 403\", () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 403]);",
+                  "});",
+                  "pm.test(\"Unpublished exam TT returns 403 or empty\", () => {",
+                  "  if (pm.response.code === 403) {",
+                  "    pm.expect(pm.response.json()).to.have.property(\"message\");",
+                  "  }",
+                  "});",
+                  "pm.test(\"Published exam TT has slots\", () => {",
+                  "  if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    const timetable = json.timetable || json;",
+                  "    if (timetable.slots) {",
+                  "      pm.expect(timetable.slots).to.be.an(\"array\");",
+                  "    }",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Syllabus",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/student/syllabus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "student",
+                "syllabus"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Syllabi for student's department returned\", () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data || json).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
