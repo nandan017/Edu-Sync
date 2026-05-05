@@ -18,6 +18,10 @@ const facultySchema = new mongoose.Schema({
   labHours: { type: Number, default: 0 },
   theoryHours: { type: Number, default: 0 },
   isHOD: { type: Boolean, default: false },
+  // Soft-delete fields
+  isTerminated: { type: Boolean, default: false },
+  terminatedAt: { type: Date },
+  terminationReason: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Faculty', facultySchema);

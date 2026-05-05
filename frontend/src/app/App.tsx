@@ -4,14 +4,17 @@ import { AdminLoginPage } from "@/components/admin/AdminLoginPage"
 import { AdminDashboard } from "@/components/admin/AdminDashboard"
 import { LoginPage } from "@/components/common/LoginPage"
 import { HODLoginPage } from "@/components/hod/HODLoginPage"
+import { HODRegistrationPage } from "@/components/hod/HODRegistrationPage"
 import { FacultyLoginPage } from "@/components/faculty/FacultyLoginPage"
 import { FacultyRegistrationPage } from "@/components/faculty/FacultyRegistrationPage"
 import { HODMainDashboard } from "@/components/hod/HODMainDashboard"
 import { FacultyDashboard } from "@/components/faculty/FacultyDashboard"
 import { PrincipalDashboard } from "@/components/principal/PrincipalDashboard"
+import { PrincipalStudentAffairs } from "@/components/principal/PrincipalStudentAffairs"
 import { DepartmentsPage } from "@/components/department/DepartmentsPage"
 import { DepartmentDetailPage } from "@/components/department/DepartmentDetailPage"
 import { StudentLoginPage } from "@/components/student/StudentLoginPage"
+import { StudentRegistrationPage } from "@/components/student/StudentRegistrationPage"
 import { StudentDashboard } from "@/components/student/StudentDashboard"
 import { StudentDetailPage } from "@/components/student/StudentDetailPage"
 import { StudentSyllabusPage } from "@/components/student/StudentSyllabusPage"
@@ -19,12 +22,13 @@ import { StudentTimetablePage } from "@/components/student/StudentTimetablePage"
 import { UnifiedTimetable } from "@/components/common/UnifiedTimetable"
 import { FacultyListPage } from "@/components/faculty/FacultyListPage"
 import { motion, AnimatePresence } from 'motion/react'
+import { clearToken } from '@/services/api'
 
 type Screen =
   | 'role-selection'
   | 'admin-login' | 'admin-dashboard' | 'admin-faculty-list'
-  | 'login' | 'hod-login' | 'faculty-login' | 'faculty-registration'
-  | 'student-login' | 'student-dashboard' | 'student-details'
+  | 'login' | 'hod-login' | 'hod-registration' | 'faculty-login' | 'faculty-registration'
+  | 'student-login' | 'student-registration' | 'student-dashboard' | 'student-details'
   | 'student-syllabus' | 'student-academic-timetable' | 'student-exam-timetable'
   | 'hod-main-dashboard' | 'faculty-dashboard'
   | 'principal-dashboard' | 'principal-student-affairs' | 'principal-faculty-management'
@@ -67,7 +71,7 @@ export default function App() {
   const getTransition = (screen: Screen) => {
     const dashboards = ['admin-dashboard', 'principal-dashboard', 'hod-main-dashboard', 'faculty-dashboard', 'student-dashboard']
     const logins = ['admin-login', 'login', 'hod-login', 'faculty-login', 'student-login']
-    const subPages = ['departments', 'department-detail', 'admin-faculty-list', 'principal-student-affairs', 'principal-faculty-management', 'student-details', 'student-syllabus', 'student-academic-timetable', 'student-exam-timetable', 'timetable']
+    const subPages = ['departments', 'department-detail', 'admin-faculty-list', 'principal-student-affairs', 'principal-faculty-management', 'student-details', 'student-syllabus', 'student-academic-timetable', 'student-exam-timetable', 'timetable', 'student-registration', 'hod-registration', 'faculty-registration']
 
     if (screen === 'role-selection') return pageTransitions.fade
     if (logins.includes(screen)) return pageTransitions.slideUp
@@ -118,6 +122,15 @@ export default function App() {
     setCurrentScreen('student-dashboard')
   }
 
+  const handleStudentRegister = () => {
+    setCurrentScreen('student-registration')
+  }
+
+  const handleStudentRegistrationSuccess = () => {
+    setCurrentUserRole('student')
+    setCurrentScreen('student-dashboard')
+  }
+
   const handleStudentNavigation = (page: string) => {
     if (page === 'details') setCurrentScreen('student-details')
     else if (page === 'syllabus') setCurrentScreen('student-syllabus')
@@ -148,6 +161,7 @@ export default function App() {
     const logins: Screen[] = ['admin-login', 'login', 'hod-login', 'faculty-login', 'student-login']
 
     if (dashboards.includes(currentScreen) || logins.includes(currentScreen)) {
+      clearToken() // Clear auth token on logout
       setCurrentScreen('role-selection')
       return
     }
@@ -175,6 +189,12 @@ export default function App() {
       case 'faculty-registration':
         setCurrentScreen('faculty-login')
         break
+      case 'hod-registration':
+        setCurrentScreen('hod-login')
+        break
+      case 'student-registration':
+        setCurrentScreen('student-login')
+        break
       default:
         setCurrentScreen('role-selection')
     }
@@ -193,13 +213,17 @@ export default function App() {
       case 'login':
         return <LoginPage onBack={handleBack} onLoginSuccess={handleLoginSuccess} />
       case 'hod-login':
-        return <HODLoginPage onBack={handleBack} onLoginSuccess={handleHODLoginSuccess} />
+        return <HODLoginPage onBack={handleBack} onLoginSuccess={handleHODLoginSuccess} onRegister={() => setCurrentScreen('hod-registration')} />
+      case 'hod-registration':
+        return <HODRegistrationPage onBack={() => setCurrentScreen('hod-login')} onRegistrationSuccess={() => setCurrentScreen('hod-login')} />
       case 'faculty-registration':
         return <FacultyRegistrationPage onBack={handleBack} onRegistrationSuccess={handleFacultyRegistrationSuccess} />
       case 'faculty-login':
         return <FacultyLoginPage onBack={handleBack} onLoginSuccess={handleFacultyLoginSuccess} onNewUser={handleFacultyNewUser} />
       case 'student-login':
-        return <StudentLoginPage onBack={handleBack} onLoginSuccess={handleStudentLoginSuccess} />
+        return <StudentLoginPage onBack={handleBack} onLoginSuccess={handleStudentLoginSuccess} onRegister={handleStudentRegister} />
+      case 'student-registration':
+        return <StudentRegistrationPage onBack={handleBack} onSuccess={handleStudentRegistrationSuccess} />
       case 'student-dashboard':
         return <StudentDashboard onBack={handleBack} onNavigate={handleStudentNavigation} />
       case 'student-details':
@@ -216,10 +240,8 @@ export default function App() {
         return <FacultyDashboard onBack={handleBack} />
       case 'principal-dashboard':
         return <PrincipalDashboard onBack={handleBack} onNavigate={handleNavigation} />
-      // Fixed: principal-student-affairs no longer renders AdminDashboard
-      // It now renders a student management view scoped for principal
       case 'principal-student-affairs':
-        return <AdminDashboard onBack={handleBack} onNavigate={() => {}} />
+        return <PrincipalStudentAffairs onBack={handleBack} />
       case 'principal-faculty-management':
         return <FacultyListPage onBack={handleBack} />
       case 'departments':

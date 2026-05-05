@@ -1,6 +1,7 @@
 const Department = require('../models/Department');
 const Faculty = require('../models/Faculty');
 const Student = require('../models/Student');
+const Timetable = require('../models/Timetable');
 const LeaveRequest = require('../models/LeaveRequest');
 const { sendSuccess, sendError } = require('../utils/response');
 const { applyLeaveToTimetable, removeLeaveFromTimetable } = require('../services/leave.service');
@@ -8,7 +9,7 @@ const { applyLeaveToTimetable, removeLeaveFromTimetable } = require('../services
 exports.getDashboard = async (req, res) => {
   try {
     const [totalDepts, totalFaculty, totalStudents, pendingLeaves] = await Promise.all([
-      Department.countDocuments(), Faculty.countDocuments(),
+      Department.countDocuments(), Faculty.countDocuments({ isTerminated: { $ne: true } }),
       Student.countDocuments(),
       LeaveRequest.countDocuments({ requesterRole: 'hod', status: 'pending' }),
     ]);
@@ -27,7 +28,7 @@ exports.getDepartmentById = async (req, res) => {
   try {
     const dept = await Department.findById(req.params.id).populate('hodId', 'fullName designation');
     if (!dept) return sendError(res, 'Department not found', 404);
-    const faculty = await Faculty.find({ departmentId: dept._id }).lean();
+    const faculty = await Faculty.find({ departmentId: dept._id, isTerminated: { $ne: true } }).lean();
     const students = await Student.countDocuments({ departmentId: dept._id });
     sendSuccess(res, { department: dept, faculty, studentCount: students });
   } catch (err) { sendError(res, err.message); }
@@ -35,15 +36,46 @@ exports.getDepartmentById = async (req, res) => {
 
 exports.getFaculty = async (req, res) => {
   try {
-    const faculty = await Faculty.find().populate('departmentId', 'name fullName').lean();
+    const faculty = await Faculty.find({ isTerminated: { $ne: true } }).populate('departmentId', 'name fullName').lean();
     sendSuccess(res, { faculty });
   } catch (err) { sendError(res, err.message); }
 };
 
 exports.getStudents = async (req, res) => {
   try {
-    const students = await Student.find().populate('departmentId', 'name fullName').lean();
+    const { search, department } = req.query;
+    const filter = {};
+    if (department) {
+      const dept = await Department.findOne({ name: department.toUpperCase() });
+      if (dept) filter.departmentId = dept._id;
+    }
+    if (search) {
+      filter.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { registerNumber: { $regex: search, $options: 'i' } },
+      ];
+    }
+    const students = await Student.find(filter).populate('departmentId', 'name fullName').sort({ createdAt: -1 }).lean();
     sendSuccess(res, { students });
+  } catch (err) { sendError(res, err.message); }
+};
+
+// GET /api/v1/principal/timetable — view all departments' timetables
+exports.getTimetable = async (req, res) => {
+  try {
+    const { department, year, section, type } = req.query;
+    const filter = {};
+    if (department) filter.department = department.toUpperCase();
+    if (year) filter.year = parseInt(year);
+    if (section) filter.section = section.toUpperCase();
+    if (type) filter.type = type;
+
+    const timetables = await Timetable.find(filter)
+      .populate('departmentId', 'name fullName')
+      .sort({ createdAt: -1 })
+      .lean();
+    sendSuccess(res, { timetables });
   } catch (err) { sendError(res, err.message); }
 };
 
@@ -57,7 +89,7 @@ exports.getLeaveRequests = async (req, res) => {
 
 exports.reviewLeaveRequest = async (req, res) => {
   try {
-    const { status } = req.body; // 'approved' or 'rejected'
+    const { status } = req.body;
     if (!['approved', 'rejected'].includes(status)) return sendError(res, 'Status must be approved or rejected', 400);
 
     const leave = await LeaveRequest.findById(req.params.id);
@@ -69,7 +101,6 @@ exports.reviewLeaveRequest = async (req, res) => {
     leave.reviewedAt = new Date();
     await leave.save();
 
-    // If approved, update timetable slots
     if (status === 'approved') {
       const facultyDoc = await Faculty.findOne({ userId: leave.requesterId });
       if (facultyDoc) await applyLeaveToTimetable(leave, facultyDoc);

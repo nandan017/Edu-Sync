@@ -155,3 +155,94 @@ exports.refresh = async (req, res) => {
     sendError(res, 'Invalid refresh token', 401);
   }
 };
+
+// GET /api/v1/auth/departments (public — for registration dropdown)
+exports.getDepartments = async (req, res) => {
+  try {
+    const departments = await Department.find({}, 'name fullName').sort({ name: 1 }).lean();
+    sendSuccess(res, { departments });
+  } catch (err) {
+    sendError(res, err.message);
+  }
+};
+
+// POST /api/v1/auth/register-staff (Faculty/HOD self-registration)
+exports.registerStaff = async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, password, department, designation,
+            qualification, gender, address, role, isClassTeacher, classSection, className } = req.body;
+
+    if (!firstName || !lastName || !email || !password) {
+      return sendError(res, 'First name, last name, email, and password are required', 400);
+    }
+
+    const validRoles = ['faculty', 'hod'];
+    const staffRole = validRoles.includes(role) ? role : 'faculty';
+
+    // Check duplicate email
+    const existingEmail = await User.findOne({ email: email.toLowerCase() });
+    if (existingEmail) return sendError(res, 'An account with this email already exists', 409);
+
+    // Find or validate department
+    const deptName = (department || 'BCA').toUpperCase();
+    let dept = await Department.findOne({ name: deptName });
+    if (!dept) {
+      return sendError(res, `Department '${deptName}' not found. Contact administrator.`, 404);
+    }
+
+    // Generate unique username
+    const username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`.replace(/[^a-z0-9.]/g, '');
+    let finalUsername = username;
+    let counter = 1;
+    while (await User.findOne({ username: finalUsername })) {
+      finalUsername = `${username}${counter}`;
+      counter++;
+    }
+
+    // Create user
+    const user = await User.create({
+      username: finalUsername,
+      email: email.toLowerCase(),
+      passwordHash: password,
+      passwordPlain: encrypt(password),
+      role: staffRole,
+    });
+
+    // Create faculty record
+    const Faculty = require('../models/Faculty');
+    const faculty = await Faculty.create({
+      userId: user._id,
+      employeeId: `EMP-${Date.now()}`,
+      fullName: `${firstName} ${lastName}`,
+      designation: designation || 'Assistant Professor',
+      qualification,
+      departmentId: dept._id,
+      phone,
+      isHOD: staffRole === 'hod',
+      weeklyHours: dept.weeklyHoursRule || 20,
+      labHours: dept.labHoursRule || 0,
+      theoryHours: dept.theoryHoursRule || 16,
+    });
+
+    // Update department counts
+    if (staffRole === 'hod' && !dept.hodId) {
+      dept.hodId = faculty._id;
+    }
+    dept.totalFaculty = await Faculty.countDocuments({ departmentId: dept._id, isTerminated: { $ne: true } });
+    await dept.save();
+
+    const { accessToken, refreshToken } = generateTokens(user._id);
+    setCookies(res, accessToken, refreshToken);
+
+    sendSuccess(res, {
+      message: 'Registration successful',
+      accessToken, refreshToken,
+      user: { id: user._id, username: user.username, email: user.email, role: staffRole },
+      faculty: { employeeId: faculty.employeeId, fullName: faculty.fullName },
+    }, 201);
+  } catch (err) {
+    if (err.code === 11000) return sendError(res, 'Duplicate entry. Email or phone already registered.', 409);
+    sendError(res, err.message);
+  }
+};
+

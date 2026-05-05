@@ -4,7 +4,9 @@ const { authLimiter } = require('../middleware/rateLimiter');
 
 router.post('/login', authLimiter, auth.login);
 router.post('/register', authLimiter, auth.register);
+router.post('/register-staff', authLimiter, auth.registerStaff);
 router.post('/logout', auth.logout);
 router.post('/refresh', auth.refresh);
+router.get('/departments', auth.getDepartments);
 
 module.exports = router;

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ArrowLeft, Eye, EyeOff, Shield } from 'lucide-react'
+import { apiLogin } from '@/services/api'
 
 interface AdminLoginPageProps { onBack: () => void; onLoginSuccess: () => void }
 
@@ -21,8 +22,22 @@ export function AdminLoginPage({ onBack, onLoginSuccess }: AdminLoginPageProps) 
   }
 
   const handleSubmit = async (ev: React.FormEvent) => {
-    ev.preventDefault(); if (!validateForm()) return; setIsLoading(true)
-    setTimeout(() => { setIsLoading(false); if (formData.username.trim() && formData.password.length >= 6) { onLoginSuccess() } else { setErrors({ general: 'Invalid credentials.' }) } }, 1000)
+    ev.preventDefault()
+    if (!validateForm()) return
+    setIsLoading(true)
+
+    try {
+      const data = await apiLogin(formData.username, formData.password)
+      if (data.user?.role !== 'admin') {
+        setErrors({ general: 'This account does not have admin privileges.' })
+        return
+      }
+      onLoginSuccess()
+    } catch (err: any) {
+      setErrors({ general: err.message || 'Login failed. Please try again.' })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const onChange = (f: string, v: string) => { setFormData(p => ({ ...p, [f]: v })); if (errors[f]) setErrors(p => ({ ...p, [f]: '' })); if (errors.general) setErrors(p => ({ ...p, general: '' })) }

@@ -8,12 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, UserPlus, CheckCircle } from 'lucide-react'
 import { apiRegisterStaff, apiGetDepartments } from '@/services/api'
 
-interface FacultyRegistrationPageProps {
+interface HODRegistrationPageProps {
   onBack: () => void
   onRegistrationSuccess: () => void
 }
 
-export function FacultyRegistrationPage({ onBack, onRegistrationSuccess }: FacultyRegistrationPageProps) {
+export function HODRegistrationPage({ onBack, onRegistrationSuccess }: HODRegistrationPageProps) {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -26,10 +26,6 @@ export function FacultyRegistrationPage({ onBack, onRegistrationSuccess }: Facul
     gender: '',
     address: '',
     department: '',
-    isClassTeacher: '',
-    classSection: '',
-    className: '',
-    isHOD: '',
   })
   const [departments, setDepartments] = useState<{name:string, fullName:string}[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -75,11 +71,11 @@ export function FacultyRegistrationPage({ onBack, onRegistrationSuccess }: Facul
         password: formData.password,
         phone: formData.phone,
         department: formData.department,
-        designation: formData.designation || 'Assistant Professor',
+        designation: formData.designation || 'Associate Professor',
         qualification: formData.qualification,
         gender: formData.gender,
         address: formData.address,
-        role: 'faculty',
+        role: 'hod',
       })
       setCreatedUser(data)
       setSuccess(true)
@@ -97,20 +93,20 @@ export function FacultyRegistrationPage({ onBack, onRegistrationSuccess }: Facul
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 flex items-center justify-center p-4">
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
           <h2 className="text-xl font-bold text-slate-900 mb-2">Registration Successful!</h2>
-          <p className="text-sm text-slate-600 mb-4">Your faculty account has been created.</p>
+          <p className="text-sm text-slate-600 mb-4">Your HOD account has been created.</p>
           {createdUser?.user && (
             <div className="bg-slate-50 rounded-xl p-4 text-left mb-4 space-y-1">
               <p className="text-sm"><span className="font-medium text-slate-700">Username:</span> {createdUser.user.username}</p>
               <p className="text-sm"><span className="font-medium text-slate-700">Employee ID:</span> {createdUser.faculty?.employeeId}</p>
             </div>
           )}
-          <Button onClick={onRegistrationSuccess} className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl">
+          <Button onClick={onRegistrationSuccess} className="w-full bg-gradient-to-r from-violet-600 to-purple-500 text-white rounded-xl">
             Go to Login
           </Button>
         </motion.div>
@@ -119,20 +115,20 @@ export function FacultyRegistrationPage({ onBack, onRegistrationSuccess }: Facul
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 p-4">
       <div className="max-w-2xl mx-auto mb-6 pt-4">
         <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4">
           <ArrowLeft className="w-5 h-5" /><span>Back to Login</span>
         </button>
       </div>
       <Card className="max-w-2xl mx-auto shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-600 p-8">
+        <CardHeader className="bg-gradient-to-r from-violet-600 to-purple-500 p-8">
           <div className="text-center">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <UserPlus className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-white text-xl font-bold mb-2">Faculty Registration</h1>
-            <p className="text-white/80 text-sm">Create your faculty account</p>
+            <h1 className="text-white text-xl font-bold mb-2">HOD Registration</h1>
+            <p className="text-white/80 text-sm">Create your Head of Department account</p>
           </div>
         </CardHeader>
         <CardContent className="p-8">
@@ -182,7 +178,6 @@ export function FacultyRegistrationPage({ onBack, onRegistrationSuccess }: Facul
                   <SelectItem value="Professor">Professor</SelectItem>
                   <SelectItem value="Associate Professor">Associate Professor</SelectItem>
                   <SelectItem value="Assistant Professor">Assistant Professor</SelectItem>
-                  <SelectItem value="Lecturer">Lecturer</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -199,7 +194,7 @@ export function FacultyRegistrationPage({ onBack, onRegistrationSuccess }: Facul
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Qualification</label>
-                <Input type="text" value={formData.qualification} onChange={e => handleChange('qualification', e.target.value)} placeholder="e.g., M.Tech, Ph.D." />
+                <Input type="text" value={formData.qualification} onChange={e => handleChange('qualification', e.target.value)} placeholder="e.g., Ph.D., M.Tech" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Gender</label>
@@ -217,28 +212,8 @@ export function FacultyRegistrationPage({ onBack, onRegistrationSuccess }: Facul
               <label className="text-sm font-medium text-gray-700">Address</label>
               <Textarea value={formData.address} onChange={e => handleChange('address', e.target.value)} placeholder="Enter full address" rows={3} />
             </div>
-            {/* Class Teacher Option */}
-            <div className="space-y-3 p-4 bg-blue-50 rounded-lg">
-              <label className="text-sm font-medium text-gray-900">Are you a class teacher?</label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2"><input type="radio" name="isClassTeacher" value="yes" checked={formData.isClassTeacher === 'yes'} onChange={e => handleChange('isClassTeacher', e.target.value)} className="w-4 h-4" /><span className="text-sm">Yes</span></label>
-                <label className="flex items-center gap-2"><input type="radio" name="isClassTeacher" value="no" checked={formData.isClassTeacher === 'no'} onChange={e => handleChange('isClassTeacher', e.target.value)} className="w-4 h-4" /><span className="text-sm">No</span></label>
-              </div>
-              {formData.isClassTeacher === 'yes' && (
-                <div className="grid grid-cols-2 gap-4 mt-3">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Class</label>
-                    <Input type="text" value={formData.className} onChange={e => handleChange('className', e.target.value)} placeholder="e.g., 1st Year BCA" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Section</label>
-                    <Input type="text" value={formData.classSection} onChange={e => handleChange('classSection', e.target.value)} placeholder="e.g., A, B" />
-                  </div>
-                </div>
-              )}
-            </div>
-            <Button type="submit" className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-xl" disabled={isLoading}>
-              {isLoading ? <div className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Registering...</div> : 'Register'}
+            <Button type="submit" className="w-full h-12 bg-gradient-to-r from-violet-600 to-purple-500 text-white font-medium rounded-xl" disabled={isLoading}>
+              {isLoading ? <div className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Registering...</div> : 'Register as HOD'}
             </Button>
           </form>
         </CardContent>

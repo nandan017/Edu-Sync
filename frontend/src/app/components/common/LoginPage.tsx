@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ArrowLeft, Eye, EyeOff, Building2 } from 'lucide-react'
 import ReCAPTCHA from 'react-google-recaptcha'
+import { apiLogin } from '@/services/api'
 
 const RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
 
@@ -29,8 +30,24 @@ export function LoginPage({ onBack, onLoginSuccess }: LoginPageProps) {
   }
 
   const handleSubmit = async (ev: React.FormEvent) => {
-    ev.preventDefault(); if (!validate()) return; setIsLoading(true)
-    setTimeout(() => { setIsLoading(false); if (formData.username.trim() && formData.password.length >= 6) { onLoginSuccess() } else { setErrors({ general: 'Invalid credentials.' }); recaptchaRef.current?.reset(); setCaptchaOk(false) } }, 1200)
+    ev.preventDefault()
+    if (!validate()) return
+    setIsLoading(true)
+
+    try {
+      const data = await apiLogin(formData.username, formData.password)
+      if (data.user?.role !== 'principal') {
+        setErrors({ general: 'This account does not have principal privileges.' })
+        recaptchaRef.current?.reset(); setCaptchaOk(false)
+        return
+      }
+      onLoginSuccess()
+    } catch (err: any) {
+      setErrors({ general: err.message || 'Invalid credentials.' })
+      recaptchaRef.current?.reset(); setCaptchaOk(false)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const onChange = (f: string, v: string) => { setFormData(p => ({ ...p, [f]: v })); if (errors[f]) setErrors(p => ({ ...p, [f]: '' })); if (errors.general) setErrors(p => ({ ...p, general: '' })) }

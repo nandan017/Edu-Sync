@@ -27,7 +27,7 @@ exports.getDashboard = async (req, res) => {
 exports.getStaff = async (req, res) => {
   try {
     const { search, department, sort, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    const filter = { isTerminated: { $ne: true } };
     if (department) {
       const dept = await Department.findOne({ name: department.toUpperCase() });
       if (dept) filter.departmentId = dept._id;
@@ -110,14 +110,40 @@ exports.updateStaff = async (req, res) => {
   } catch (err) { sendError(res, err.message); }
 };
 
-// DELETE /api/v1/admin/staff/:id
+// DELETE /api/v1/admin/staff/:id (soft-delete → Ex-Employees)
 exports.deleteStaff = async (req, res) => {
   try {
     const faculty = await Faculty.findById(req.params.id);
     if (!faculty) return sendError(res, 'Staff not found', 404);
-    await User.findByIdAndDelete(faculty.userId);
-    await Faculty.findByIdAndDelete(req.params.id);
-    sendSuccess(res, { message: 'Staff deleted' });
+
+    // Soft-delete: mark as terminated, deactivate user account
+    faculty.isTerminated = true;
+    faculty.terminatedAt = new Date();
+    faculty.terminationReason = req.body.reason || 'Removed by admin';
+    await faculty.save();
+
+    await User.findByIdAndUpdate(faculty.userId, { isActive: false });
+
+    // Update department faculty count
+    const dept = await Department.findById(faculty.departmentId);
+    if (dept) {
+      dept.totalFaculty = await Faculty.countDocuments({ departmentId: dept._id, isTerminated: { $ne: true } });
+      await dept.save();
+    }
+
+    sendSuccess(res, { message: 'Staff moved to Ex-Employees' });
+  } catch (err) { sendError(res, err.message); }
+};
+
+// GET /api/v1/admin/staff/ex-employees
+exports.getExEmployees = async (req, res) => {
+  try {
+    const exEmployees = await Faculty.find({ isTerminated: true })
+      .populate('departmentId', 'name fullName')
+      .populate('userId', 'username email')
+      .sort({ terminatedAt: -1 })
+      .lean();
+    sendSuccess(res, { exEmployees });
   } catch (err) { sendError(res, err.message); }
 };
 

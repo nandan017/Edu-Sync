@@ -12,5 +12,6 @@ router.get('/students', principal.getStudents);
 router.get('/leave-requests', principal.getLeaveRequests);
 router.put('/leave-requests/:id', principal.reviewLeaveRequest);
 router.get('/profile', principal.getProfile);
+router.get('/timetable', principal.getTimetable);
 
 module.exports = router;

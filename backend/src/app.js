@@ -12,6 +12,7 @@ const principalRoutes = require('./routes/principal.routes');
 const hodRoutes = require('./routes/hod.routes');
 const facultyRoutes = require('./routes/faculty.routes');
 const studentRoutes = require('./routes/student.routes');
+const gateRoutes = require('./routes/gate.routes');
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use('/api/v1/principal', principalRoutes);
 app.use('/api/v1/hod', hodRoutes);
 app.use('/api/v1/faculty', facultyRoutes);
 app.use('/api/v1/student', studentRoutes);
+app.use('/api/v1/gate', gateRoutes);
 
 // ─── 404 Handler ───
 app.use((req, res) => {

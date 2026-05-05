@@ -12,6 +12,7 @@ router.get('/profile', admin.getProfile);
 router.get('/staff', admin.getStaff);
 router.post('/staff', admin.createStaff);
 router.post('/staff/bulk-import', upload.single('file'), admin.bulkImportStaff);
+router.get('/staff/ex-employees', admin.getExEmployees);
 router.put('/staff/:id', admin.updateStaff);
 router.delete('/staff/:id', admin.deleteStaff);
 
